@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-extern int consider(int, int *);
+extern int consider(int, int, int, int *);
 
 int main(int argc, char **argv) {
   FILE *fp;
   char str[60];
-  int solution = 0;
+  unsigned solution = 0;
   
   if (argc != 2) {
     printf("%s <inputfile>\n", argv[0]);
@@ -21,21 +22,23 @@ int main(int argc, char **argv) {
 
   while (!feof(fp)) {
     char *next, *stub;
-    int total, count;
+    unsigned total, count;
     int *vals = malloc(sizeof(int)*40);
-    
 
-    fgets(str, 60, fp);
+    if (fgets(str, 60, fp) == NULL)
+      break;
     total = strtol(str, &next, 10);
     stub = next+1;
+    count = 0;
     while (*stub != '\0' && *stub != '\n') {
       vals[count] = strtol(stub, &next, 10);
       stub = next;
       count++;
-    } 
-    solution += consider(total, vals);
+    }
+    if (consider(total, 0, count, vals))
+      solution += total;
   }
   fclose(fp);
-  printf("Solution sum = %d\n", solution);
+  printf("Solution sum = %u\n", solution);
   exit(0);
 }

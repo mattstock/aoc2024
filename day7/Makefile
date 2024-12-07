@@ -3,7 +3,7 @@ CC = cc
 all: day7
 
 day7: wrapper.o day7.o
-	$(CC) -o $@ $<
+	$(CC) -o $@ wrapper.o day7.o
 
 day7.o: day7.S
 
