@@ -9,7 +9,7 @@
 	! %i3 - pointer to value list
 	.global consider
 consider:
-	save %sp, -96, %sp
+	save %sp, -176, %sp
 
 	! base case
 	tst %i2
@@ -37,10 +37,10 @@ consider:
 	bne .suc
 	nop
 
-	! try mul
+foo:	! try mul
 	ld [%i3], %l0
 	mov %i0, %o0
-	umul %i1, %l0, %o1
+	mulx %i1, %l0, %o1
 	sub %i2, 1, %o2
 	add %i3, 4, %o3
 	call consider
@@ -52,4 +52,3 @@ consider:
 	nop
 .done:	ret
 	restore
-

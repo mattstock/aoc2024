@@ -1,4 +1,5 @@
 CC = cc
+CFLAGS = -mcpu=ultrasparc
 
 all: day7
 
