@@ -2,9 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-extern unsigned long consider(unsigned int, unsigned int, int, int *);
+extern unsigned consider(unsigned long, unsigned long, int, int *);
+extern unsigned long glue(unsigned long, unsigned long);
 
-unsigned long solution = 0;
+unsigned long long solution = 0;
+unsigned int test[] = { 456, 789 };
+volatile long long ploop;
 
 int main(int argc, char **argv) {
   FILE *fp;
@@ -41,6 +44,6 @@ int main(int argc, char **argv) {
       solution += total;
   }
   fclose(fp);
-  printf("Solution sum = %lu\n", solution);
+  printf("Solution sum = %llu\n", solution);
   exit(0);
 }
