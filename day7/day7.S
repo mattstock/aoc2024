@@ -27,7 +27,6 @@ glue:
 	.global consider
 consider:
 	save %sp, -176, %sp
-
 	! base case
 	tst %i2
 	bne .recurse
@@ -41,7 +40,11 @@ consider:
 .fail:  clr %i0
 	ba .done
 	nop
-.recurse:	
+.recurse:
+	! are we already too big?
+	cmp %i0, %i2
+	blu .fail
+	nop
 	! try add
 	ld [%i3], %l0
 	add %i1, %l0, %o1
@@ -67,8 +70,8 @@ consider:
 	nop
 
 	! try concat
-	ld [%i3], %o0
-	mov %i1, %o1
+	ld [%i3], %o1
+	mov %i1, %o0
 	call glue
 	nop
 	mov %o0, %o1

@@ -3,11 +3,8 @@
 #include <string.h>
 
 extern unsigned consider(unsigned long, unsigned long, int, int *);
-extern unsigned long glue(unsigned long, unsigned long);
 
 unsigned long long solution = 0;
-unsigned int test[] = { 456, 789 };
-volatile long long ploop;
 
 int main(int argc, char **argv) {
   FILE *fp;
