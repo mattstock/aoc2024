@@ -1,5 +1,5 @@
 CC = cc
-#CFLAGS = -mcpu=ultrasparc
+CFLAGS = -mcpu=ultrasparc
 
 all: day8
 
