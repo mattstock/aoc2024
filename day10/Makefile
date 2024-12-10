@@ -1,14 +1,14 @@
 CC = cc
 CFLAGS = -mcpu=ultrasparc
 
-all: day10
+all: aoc
 
-day10: wrapper.o day10.o
-	$(CC) -o $@ wrapper.o day10.o
+aoc: wrapper.o aoc.o
+	$(CC) -o $@ wrapper.o aoc.o
 
-day10.o: day10.S
+aoc.o: aoc.S
 
 wrapper.o: wrapper.c
 
 clean:
-	rm -f *.o *~ day10 *.core
+	rm -f *.o *~ aoc *.core
