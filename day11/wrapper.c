@@ -19,7 +19,7 @@ void print_row(struct rock *idx) {
   putchar('\n');
 }
 
-int digit_counts(int x) {
+int digit_counts(unsigned long x) {
   int d = 1;
   while (x = x/10)
     d++;
@@ -101,16 +101,15 @@ int main(int argc, char **argv) {
   }
 
   
-  print_row(row);
-  for (int i=0; i < 25; i++) {
+  for (int i=0; i < 75; i++) {
     blink(row);
-    print_row(row);
+    int count=0;
+    struct rock *temprow = row;
+    while (temprow != NULL) {
+      count++;
+      temprow=temprow->next;
+    }
+    printf("%d: rock count = %d\n", i+1, count);
   }
-  int count=0;
-  while (row != NULL) {
-    count++;
-    row=row->next;
-  }
-  printf("rock count = %d\n", count);
   exit(0);
 }
