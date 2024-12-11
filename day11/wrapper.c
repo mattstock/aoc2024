@@ -13,7 +13,7 @@ struct rock {
 
 void print_row(struct rock *idx) {
   while (idx != NULL) {
-    printf("%d ", idx->v);
+    printf("%lu ", idx->v);
     idx = idx->next;
   }
   putchar('\n');
@@ -27,44 +27,36 @@ int digit_counts(int x) {
 }
   
 void blink(struct rock *idx) {
-  unsigned long d,p;
+  unsigned long p;
+  int d;
   struct rock *newrock;
 
-  print_row(idx);
-  
   while (idx != NULL) {
-    printf("examine %lu\n", idx->v);
     // rule 0
     if (idx->v == 0) {
       idx->v = 1;
       idx = idx->next;
-      printf("rule 0\n");
       continue;
     }
     // rule even
     d = digit_counts(idx->v);
     if (!(d % 2)) {
-      printf("rule even\n");
       d /= 2;
-      printf("half is %d\n", d);
       newrock = malloc(sizeof(struct rock));
       newrock->next = idx->next;
       idx->next = newrock;
       newrock->v = 0;
       p=1;
       while (d) {
-	printf("before %lu\n", idx->v);
 	newrock->v += (idx->v % 10)*p;
 	idx->v = idx->v / 10;
 	p *= 10;
 	d--;
-	printf(" split %lu : %lu\n", idx->v, newrock->v);
       }
       idx = newrock->next;
       continue;
     }
     // rule 2024
-    printf("rule 2024\n");
     idx->v *= 2024;
     idx = idx->next;
   }
@@ -109,7 +101,8 @@ int main(int argc, char **argv) {
   }
 
   
-  for (int i=0; i < 26; i++) {
+  print_row(row);
+  for (int i=0; i < 25; i++) {
     blink(row);
     print_row(row);
   }
