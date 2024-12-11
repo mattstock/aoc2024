@@ -10,32 +10,20 @@ unsigned int mapsize;
 unsigned int cols;
 unsigned int rows;
 
-struct coord {
-  int x;
-  int y;
-};
-
 int coord2pos(int x, int y) {
   return y*(cols+1)+x;
 }
 
-struct coord *pos2coord(int x) {
-  struct coord *foo = malloc(sizeof(struct coord));
-
-  foo->y = x/(cols+1);
-  foo->x = x%(cols+1);
-  return foo;
+void pos2coord(int pos, int *x, int *y) {
+  *y = pos/(cols+1);
+  *x = pos%(cols+1);
 }
 
 int yodel(int pos, char val) {
-  struct coord *here;
   int score = 0;
   int x, y, foo;
 
-  here = pos2coord(pos);
-  x = here->x;
-  y = here->y;
-  free(here);
+  pos2coord(pos, &x, &y);
 
   if (map[pos] != val) {
     return 0;
@@ -104,7 +92,6 @@ int main(int argc, char **argv) {
   for (int i=0; i < mapsize; i++) {
     if (map[i] != '0')
       continue;
-    struct coord *th = pos2coord(i);
     strcpy(scratch, map);
     count += yodel(i,'0');
   }
