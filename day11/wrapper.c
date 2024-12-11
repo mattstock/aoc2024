@@ -13,6 +13,7 @@ struct rock {
 };
 
 unsigned long workqueue = 0;
+unsigned long iterations = 25;
 
 int digit_counts(unsigned long x) {
   int d = 1;
@@ -68,12 +69,14 @@ int main(int argc, char **argv) {
 
   int val, e;
 
-  if (argc != 2) {
-    printf("%s <inputfile>\n", argv[0]);
+  if (argc != 3) {
+    printf("%s <iterations> <inputfile>\n", argv[0]);
     exit(1);
   }
 
-  fd = open(argv[1], O_RDONLY);
+  iterations = strtol(argv[1], NULL, 10);
+  
+  fd = open(argv[2], O_RDONLY);
   if (fd == -1) {
     printf("Pick a real file!\n");
     exit(1);
@@ -100,7 +103,7 @@ int main(int argc, char **argv) {
 
   // Depth first
   while (row != NULL) {
-    for (int i=0; i < 75; i++)
+    for (int i=0; i < iterations; i++)
       blink(i, row);
     //    printf("work queue = %lu\n", workqueue);
     count++;
