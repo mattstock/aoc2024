@@ -7,17 +7,12 @@
 #include <unistd.h>
 
 struct rock {
+  unsigned int ply;
   unsigned long v;
   struct rock *next;
 };
 
-void print_row(struct rock *idx) {
-  while (idx != NULL) {
-    printf("%lu ", idx->v);
-    idx = idx->next;
-  }
-  putchar('\n');
-}
+unsigned long workqueue = 0;
 
 int digit_counts(unsigned long x) {
   int d = 1;
@@ -26,40 +21,40 @@ int digit_counts(unsigned long x) {
   return d;
 }
   
-void blink(struct rock *idx) {
+void blink(unsigned int ply, struct rock *idx) {
   unsigned long p;
   int d;
   struct rock *newrock;
 
-  while (idx != NULL) {
-    // rule 0
-    if (idx->v == 0) {
-      idx->v = 1;
-      idx = idx->next;
-      continue;
-    }
-    // rule even
-    d = digit_counts(idx->v);
-    if (!(d % 2)) {
-      d /= 2;
-      newrock = malloc(sizeof(struct rock));
-      newrock->next = idx->next;
-      idx->next = newrock;
-      newrock->v = 0;
-      p=1;
-      while (d) {
-	newrock->v += (idx->v % 10)*p;
-	idx->v = idx->v / 10;
-	p *= 10;
-	d--;
-      }
-      idx = newrock->next;
-      continue;
-    }
-    // rule 2024
-    idx->v *= 2024;
-    idx = idx->next;
+  if (ply < idx->ply)
+    return;
+  
+  // rule 0
+  if (idx->v == 0) {
+    idx->v = 1;
+    return;
   }
+  // rule even
+  d = digit_counts(idx->v);
+  if (!(d % 2)) {
+    d /= 2;
+    newrock = malloc(sizeof(struct rock));
+    newrock->next = idx->next;
+    newrock->ply = ply+1;
+    idx->next = newrock;
+    newrock->v = 0;
+    p=1;
+    while (d) {
+      newrock->v += (idx->v % 10)*p;
+      idx->v = idx->v / 10;
+      p *= 10;
+      d--;
+    }
+    workqueue++;
+    return;
+  }
+  // rule 2024
+  idx->v *= 2024;
 }
 
 int main(int argc, char **argv) {
@@ -69,6 +64,7 @@ int main(int argc, char **argv) {
   struct rock *tmprock, *lastrock;
   struct rock *row = NULL;
   char *idx, *idxnext;
+  unsigned long count = 0;
 
   int val, e;
 
@@ -91,7 +87,9 @@ int main(int argc, char **argv) {
   while (*idx != '\0' && *idx != '\n') {
     tmprock = malloc(sizeof(struct rock));
     tmprock->next = NULL;
+    tmprock->ply = 0;
     tmprock->v = strtol(idx, &idxnext, 10);
+    workqueue++;
     if (row == NULL)
       row = tmprock;
     else
@@ -100,16 +98,25 @@ int main(int argc, char **argv) {
     idx = idxnext;
   }
 
-  
-  for (int i=0; i < 75; i++) {
-    blink(row);
-    int count=0;
-    struct rock *temprow = row;
-    while (temprow != NULL) {
-      count++;
-      temprow=temprow->next;
-    }
-    printf("%d: rock count = %d\n", i+1, count);
+  // Depth first
+  while (row != NULL) {
+    for (int i=0; i < 75; i++)
+      blink(i, row);
+    //    printf("work queue = %lu\n", workqueue);
+    count++;
+    workqueue--;
+    lastrock = row;
+    row=row->next;
+    free(lastrock);
   }
+  /*
+  while (lastrock != NULL) {
+    printf("%lu ", lastrock->v);
+    lastrock=lastrock->next;
+  }
+  putchar('\n');
+  */ 
+  printf("got %lu\n", count);
+	   
   exit(0);
 }
