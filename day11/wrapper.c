@@ -3,80 +3,87 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <unistd.h>
 
-char *map, *scratch;
-unsigned int mapsize;
-unsigned int cols;
-unsigned int rows;
+struct rock {
+  unsigned long v;
+  struct rock *next;
+};
 
-extern int coord2pos(int x, int y);
-
-/*
-int coord2pos(int x, int y) {
-  return y*(cols+1)+x;
+void print_row(struct rock *idx) {
+  while (idx != NULL) {
+    printf("%d ", idx->v);
+    idx = idx->next;
+  }
+  putchar('\n');
 }
-*/
 
-extern void pos2coord(int pos, int *x, int *y);
-
-/*
-void pos2coord(int pos, int *x, int *y) {
-  *y = pos/(cols+1);
-  *x = pos%(cols+1);
+int digit_counts(int x) {
+  int d = 1;
+  while (x = x/10)
+    d++;
+  return d;
 }
-*/
+  
+void blink(struct rock *idx) {
+  unsigned long d,p;
+  struct rock *newrock;
 
-int yodel(int pos, char val) {
-  int score = 0;
-  int x, y, foo;
-
-  pos2coord(pos, &x, &y);
-
-  if (map[pos] != val) {
-    return 0;
+  print_row(idx);
+  
+  while (idx != NULL) {
+    printf("examine %lu\n", idx->v);
+    // rule 0
+    if (idx->v == 0) {
+      idx->v = 1;
+      idx = idx->next;
+      printf("rule 0\n");
+      continue;
+    }
+    // rule even
+    d = digit_counts(idx->v);
+    if (!(d % 2)) {
+      printf("rule even\n");
+      d /= 2;
+      printf("half is %d\n", d);
+      newrock = malloc(sizeof(struct rock));
+      newrock->next = idx->next;
+      idx->next = newrock;
+      newrock->v = 0;
+      p=1;
+      while (d) {
+	printf("before %lu\n", idx->v);
+	newrock->v += (idx->v % 10)*p;
+	idx->v = idx->v / 10;
+	p *= 10;
+	d--;
+	printf(" split %lu : %lu\n", idx->v, newrock->v);
+      }
+      idx = newrock->next;
+      continue;
+    }
+    // rule 2024
+    printf("rule 2024\n");
+    idx->v *= 2024;
+    idx = idx->next;
   }
-  if (map[pos] == '9') {
-    //    if (scratch[pos] == '*')
-    //  return 0;
-    scratch[pos] = '*';
-    return 1;
-  }
-  // N
-  if (y-1 >= 0) {
-    foo = yodel(coord2pos(x, y-1), val+1);
-    score += foo;
-  }
-  // S
-  if (y+1 <= rows) {
-    foo = yodel(coord2pos(x, y+1), val+1);
-    score += foo;
-  }
-  // W
-  if (x-1 >= 0) {
-    foo = yodel(coord2pos(x-1, y), val+1);
-    score += foo;
-  }
-  // E
-  if (x+1 <= cols) {
-    foo = yodel(coord2pos(x+1, y), val+1);
-    score += foo;
-  }
-  return score;
 }
 
 int main(int argc, char **argv) {
+  char rawline[100];
+  int linesize;
   int fd;
-  int count = 0;
-  char str[60];
-  
+  struct rock *tmprock, *lastrock;
+  struct rock *row = NULL;
+  char *idx, *idxnext;
+
+  int val, e;
+
   if (argc != 2) {
     printf("%s <inputfile>\n", argv[0]);
     exit(1);
   }
-
-  // room for the map
-  map = malloc(5000);
 
   fd = open(argv[1], O_RDONLY);
   if (fd == -1) {
@@ -84,28 +91,33 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  mapsize = read(fd, map, 5000);
-  map[mapsize] = '\0';
-  scratch = malloc(mapsize+1);
-  strcpy(scratch, map);
+  linesize = read(fd, rawline, 100);
+  rawline[linesize] = '\0';
   close(fd);
 
-  // size of things
-  cols = (strchr(map, '\n')-map);
-  rows = strlen(map)/(cols+1);
-
-  printf("size is %u, %u\n", cols, rows);
-  
-  count = 0;
-  for (int i=0; i < mapsize; i++) {
-    if (map[i] != '0')
-      continue;
-    strcpy(scratch, map);
-    count += yodel(i,'0');
+  idx = rawline;
+  while (*idx != '\0' && *idx != '\n') {
+    tmprock = malloc(sizeof(struct rock));
+    tmprock->next = NULL;
+    tmprock->v = strtol(idx, &idxnext, 10);
+    if (row == NULL)
+      row = tmprock;
+    else
+      lastrock->next = tmprock;
+    lastrock = tmprock;
+    idx = idxnext;
   }
+
   
-  printf("paths = %d\n", count);
-  
-  free(map);
+  for (int i=0; i < 26; i++) {
+    blink(row);
+    print_row(row);
+  }
+  int count=0;
+  while (row != NULL) {
+    count++;
+    row=row->next;
+  }
+  printf("rock count = %d\n", count);
   exit(0);
 }
