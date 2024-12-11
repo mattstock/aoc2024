@@ -30,44 +30,44 @@ struct coord *pos2coord(int x) {
 int yodel(int pos, char val) {
   struct coord *here;
   int score = 0;
-  int x, y;
-  
-  if (map[pos] != val)
-    return 0;
-  if (map[pos] == '9') {
-    scratch[pos] = '*';
-    return 1;
-  }
-  // Need to recurse for each valid cardinal direction!
+  int x, y, foo;
+
   here = pos2coord(pos);
   x = here->x;
   y = here->y;
   free(here);
-  
-  printf("Found %c at map(%d, %d)\n", val, x, y);
+
+  if (map[pos] != val) {
+    return 0;
+  }
+  if (map[pos] == '9') {
+    printf("[%d, %d]\n", x, y);
+    scratch[pos] = '*';
+    return 1;
+  }
+  // Need to recurse for each valid cardinal direction!
   scratch[pos] = 'a'-'0'+val;
   
   // N
   if (y-1 >= 0) {
-    score += yodel(coord2pos(x, y-1), val+1);
-    printf("N score = %d\n", score);
+    foo = yodel(coord2pos(x, y-1), val+1);
+    score += foo;
   }
   // S
   if (y+1 <= rows) {
-    score += yodel(coord2pos(x, y+1), val+1);
-    printf("S score = %d\n", score);
+    foo = yodel(coord2pos(x, y+1), val+1);
+    score += foo;
   }
   // W
   if (x-1 >= 0) {
-    score += yodel(coord2pos(x-1, y), val+1);
-    printf("W score = %d (%d, %d)\n", score, x, x-1);
+    foo = yodel(coord2pos(x-1, y), val+1);
+    score += foo;
   }
   // E
   if (x+1 <= cols) {
-    score += yodel(coord2pos(x+1, y), val+1);
-    printf("E score = %d\n", score);
+    foo = yodel(coord2pos(x+1, y), val+1);
+    score += foo;
   }
-  free(here);
   return score;
 }
 
@@ -109,7 +109,6 @@ int main(int argc, char **argv) {
     struct coord *th = pos2coord(i);
     printf("Found trailhead at %d, %d\n", th->x, th->y);
     strcpy(scratch, map);
-    count += yodel(i, '0');
     printf("trailhead total is %d\n", yodel(i, '0'));
     printf(scratch);
   }
