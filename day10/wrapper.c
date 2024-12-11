@@ -5,27 +5,70 @@
 #include <errno.h>
 #include <unistd.h>
 
-unsigned char *map;
-unsigned char *paint;
+char *map, *scratch;
 unsigned int mapsize;
+unsigned int cols;
+unsigned int rows;
 
-extern void antiseek();
-extern int yoff(unsigned char *pos1, unsigned char *pos2);
-extern int xoff(unsigned char *pos1, unsigned char *pos2);
+struct coord {
+  int x;
+  int y;
+};
 
-extern unsigned int cols, rows;
-
-// so much easier to do this in C!
-void debugchat(unsigned char *a, unsigned char *b) {
-  printf("match %c (%d, %d) -> (%d, %d)\n",
-	 *a,
-	 xoff(map, a), yoff(map, a),
-	 xoff(map, b), yoff(map, b));
-  printf("  offset (%d, %d)\n", xoff(map,b)-xoff(map,a), yoff(map,b)-yoff(map,a));
+int coord2pos(int x, int y) {
+  return y*(cols+1)+x;
 }
 
-void printmap() {
-  printf("%s", paint);
+struct coord *pos2coord(int x) {
+  struct coord *foo = malloc(sizeof(struct coord));
+
+  foo->y = x/(cols+1);
+  foo->x = x%(cols+1);
+  return foo;
+}
+
+int yodel(int pos, char val) {
+  struct coord *here;
+  int score = 0;
+  int x, y;
+  
+  if (map[pos] != val)
+    return 0;
+  if (map[pos] == '9') {
+    scratch[pos] = '*';
+    return 1;
+  }
+  // Need to recurse for each valid cardinal direction!
+  here = pos2coord(pos);
+  x = here->x;
+  y = here->y;
+  free(here);
+  
+  printf("Found %c at map(%d, %d)\n", val, x, y);
+  scratch[pos] = 'a'-'0'+val;
+  
+  // N
+  if (y-1 >= 0) {
+    score += yodel(coord2pos(x, y-1), val+1);
+    printf("N score = %d\n", score);
+  }
+  // S
+  if (y+1 <= rows) {
+    score += yodel(coord2pos(x, y+1), val+1);
+    printf("S score = %d\n", score);
+  }
+  // W
+  if (x-1 >= 0) {
+    score += yodel(coord2pos(x-1, y), val+1);
+    printf("W score = %d (%d, %d)\n", score, x, x-1);
+  }
+  // E
+  if (x+1 <= cols) {
+    score += yodel(coord2pos(x+1, y), val+1);
+    printf("E score = %d\n", score);
+  }
+  free(here);
+  return score;
 }
 
 int main(int argc, char **argv) {
@@ -39,7 +82,7 @@ int main(int argc, char **argv) {
   }
 
   // room for the map
-  map = malloc(3000);
+  map = malloc(5000);
 
   fd = open(argv[1], O_RDONLY);
   if (fd == -1) {
@@ -47,22 +90,32 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  mapsize = read(fd, map, 3000);
+  mapsize = read(fd, map, 5000);
   map[mapsize] = '\0';
-  paint = malloc(mapsize+1);
-  paint[mapsize] = '\0';
+  scratch = malloc(mapsize+1);
+  strcpy(scratch, map);
   close(fd);
 
-  antiseek();
+  // size of things
+  cols = (strchr(map, '\n')-map);
+  rows = strlen(map)/(cols+1);
 
-  printf("%s\n", paint);
-
+  printf("size is %u, %u\n", cols, rows);
   
-  for (int i=0; i < mapsize; i++)
-    count += (paint[i] == '#');
-
-  printf("antinodes = %d\n", count);
+  count = 0;
+  for (int i=0; i < mapsize; i++) {
+    if (map[i] != '0')
+      continue;
+    struct coord *th = pos2coord(i);
+    printf("Found trailhead at %d, %d\n", th->x, th->y);
+    strcpy(scratch, map);
+    count += yodel(i, '0');
+    printf("trailhead total is %d\n", yodel(i, '0'));
+    printf(scratch);
+  }
+  
+  printf("paths = %d\n", count);
+  
   free(map);
-  free(paint);
   exit(0);
 }
