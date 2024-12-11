@@ -41,13 +41,11 @@ int yodel(int pos, char val) {
     return 0;
   }
   if (map[pos] == '9') {
-    printf("[%d, %d]\n", x, y);
+    //    if (scratch[pos] == '*')
+    //  return 0;
     scratch[pos] = '*';
     return 1;
   }
-  // Need to recurse for each valid cardinal direction!
-  scratch[pos] = 'a'-'0'+val;
-  
   // N
   if (y-1 >= 0) {
     foo = yodel(coord2pos(x, y-1), val+1);
@@ -107,10 +105,8 @@ int main(int argc, char **argv) {
     if (map[i] != '0')
       continue;
     struct coord *th = pos2coord(i);
-    printf("Found trailhead at %d, %d\n", th->x, th->y);
     strcpy(scratch, map);
-    printf("trailhead total is %d\n", yodel(i, '0'));
-    printf(scratch);
+    count += yodel(i,'0');
   }
   
   printf("paths = %d\n", count);

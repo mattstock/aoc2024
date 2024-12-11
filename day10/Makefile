@@ -1,5 +1,5 @@
 CC = cc
-CFLAGS = -mcpu=ultrasparc
+CFLAGS = -g # -mcpu=ultrasparc
 
 all: aoc
 
