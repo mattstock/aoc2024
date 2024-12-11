@@ -10,14 +10,22 @@ unsigned int mapsize;
 unsigned int cols;
 unsigned int rows;
 
+extern int coord2pos(int x, int y);
+
+/*
 int coord2pos(int x, int y) {
   return y*(cols+1)+x;
 }
+*/
 
+extern void pos2coord(int pos, int *x, int *y);
+
+/*
 void pos2coord(int pos, int *x, int *y) {
   *y = pos/(cols+1);
   *x = pos%(cols+1);
 }
+*/
 
 int yodel(int pos, char val) {
   int score = 0;

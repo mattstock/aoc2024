@@ -3,8 +3,8 @@ CFLAGS = -g -mcpu=ultrasparc
 
 all: aoc
 
-aoc: wrapper.o
-	$(CC) -o $@ wrapper.o
+aoc: wrapper.o aoc.o
+	$(CC) -o $@ wrapper.o aoc.o
 
 aoc.o: aoc.S
 
