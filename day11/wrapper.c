@@ -15,13 +15,17 @@ struct rock {
 unsigned long workqueue = 0;
 unsigned long iterations = 25;
 
+extern int digit_counts(unsigned long x);
+
+/*
 int digit_counts(unsigned long x) {
   int d = 1;
   while (x = x/10)
     d++;
   return d;
 }
-  
+*/
+
 void blink(unsigned int ply, struct rock *idx) {
   unsigned long p;
   int d;
